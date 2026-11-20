@@ -80,7 +80,6 @@ sudo chmod 600 "$ENVFILE"
 say "4/5  Letting the panel start and stop Minecraft servers (and nothing else), and the template for new servers"
 sudo tee /usr/local/bin/mcctl >/dev/null <<'EOF'
 #!/bin/bash
-# Lets the Minecraft panel start, stop or restart a Minecraft server, and nothing else. Installed by install-panel.sh.
 set -eu
 action="${1:-}"
 id="${2:-}"
