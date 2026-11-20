@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<title>Server panel</title>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<main id="gate" class="login" hidden>
+  <div class="card">
+    <h1>Server panel</h1>
+    <h2 id="gateTitle"></h2>
+    <p id="gateText" class="muted"></p>
+    <form id="gatePwForm" class="fields" hidden>
+      <label for="gatePw">Password</label>
+      <input id="gatePw" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false" required>
+      <div class="row"><button class="primary" type="submit">Sign in</button></div>
+      <div class="row"><button id="gatePwAsk" type="button" class="link">No password? Ask the owner</button><button id="gatePwCode" type="button" class="link">I have an invite code</button></div>
+    </form>
+    <form id="gateCodeForm" class="fields" hidden>
+      <label for="gateCode">Code</label>
+      <input id="gateCode" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX-XXXX" required>
+      <label for="gateCodeName">Your name (shown to the owner)</label>
+      <input id="gateCodeName" maxlength="30" autocomplete="off" required>
+      <div class="row"><button class="primary" type="submit">Continue</button><button id="gateBack" type="button" class="link">Ask the owner instead</button></div>
+    </form>
+    <button id="gateHere" type="button" hidden>This computer is the owner</button>
+    <form id="gateAskForm" class="fields" hidden>
+      <label for="gateAskName">Your name (shown to the owner)</label>
+      <input id="gateAskName" maxlength="30" autocomplete="off" required>
+      <p class="muted">If the owner sent you a link, open that link instead: it lets you straight in.</p>
+      <div class="row"><button class="primary" type="submit">Ask for access</button><button id="gateHaveCode" type="button" class="link">I have an invite code</button></div>
+    </form>
+    <a id="gateApp" class="btn" href="#" hidden>Open in the Server Panel app</a>
+    <button id="gateUsePw" type="button" class="link" hidden>Use the password instead</button>
+    <button id="gateRetry" type="button" class="link" hidden>Ask again with another name</button>
+    <p id="gateErr" class="err" role="alert"></p>
+  </div>
+</main>
+
+<div id="app" hidden>
+  <nav id="tabs" aria-label="Sections">
+    <button data-tab="overview" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21H3z"/></svg>Overview</button>
+    <button data-tab="console"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M4 5h16v14H4zM7 9l3 3-3 3M12 15h5"/></svg>Console</button>
+    <button data-tab="players"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M17 5v6M20 8h-6"/></svg>Players</button>
+    <button data-tab="worlds" class="sec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Worlds</button>
+    <button data-tab="mods" class="sec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M12 3 3 7.5v9L12 21l9-4.5v-9zM3 7.5l9 4.5 9-4.5M12 12v9"/></svg><span class="lbl">Mods</span></button>
+    <button data-tab="files"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M3 5h7l2 2h9v13H3z"/></svg>Files</button>
+    <button data-tab="backups" class="sec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M3 7h18v4H3zM5 11v9h14v-9M10 15h4"/></svg>Backups</button>
+    <button data-tab="look" class="sec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.4"/></svg>Look</button>
+    <button data-tab="settings" class="sec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Settings</button>
+    <button data-tab="import" class="sec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>Move a server here</button>
+    <button data-tab="access" class="sec"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Access<span id="accBadge" class="badge" hidden></span></button>
+    <button id="btnMore" class="more" aria-haspopup="dialog"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="4" y="10" width="4" height="4"/><rect x="10" y="10" width="4" height="4"/><rect x="16" y="10" width="4" height="4"/></svg>More</button>
+  </nav>
+
+  <div class="main">
+    <header class="top">
+      <button id="srvEntry" class="ent px" type="button" aria-haspopup="dialog" aria-label="Switch server">
+        <img id="enIcon" class="ico" alt="" width="64" height="64">
+        <span class="tx">
+          <span class="tp"><span id="enName">Server</span><span class="cnt"><span id="enCount">–</span><span id="enBars" class="bars off" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span></span></span>
+          <span id="enMotd1" class="mo"></span>
+          <span id="enMotd2" class="mo"></span>
+        </span>
+      </button>
+      <div class="topline">
+        <span id="pill" class="pill">…</span>
+        <span class="grow"></span>
+        <button id="appServers" class="ghost" type="button" hidden>Panels</button>
+        <button id="srvSwitch" class="ghost" type="button">Switch server ▾</button>
+      </div>
+    </header>
+
+    <div id="pageHead" class="phead" hidden><h1 id="phTitle" class="px"></h1><small id="phSub"></small></div>
+
+    <div class="page">
+
+      <section id="welcome" hidden>
+        <div class="hero">
+          <p class="state"><span class="dot"></span><span>Welcome</span></p>
+          <h1 class="big">No server yet</h1>
+          <p class="sub">Create your first Minecraft server. Pick the software and version, give it a name, and the panel downloads and sets everything up.</p>
+          <div class="acts"><button id="welcomeNew" class="primary">Create a server</button><button id="welcomeImport" type="button">Move a server here (Aternos…)</button></div>
+        </div>
+      </section>
+
+      <section id="tab-overview">
+        <div class="hero">
+          <p class="state"><span id="stDot" class="dot"></span><span id="stLabel">Server is</span></p>
+          <h1 id="stBig" class="big">…</h1>
+          <p id="stSub" class="sub"></p>
+          <div class="acts">
+            <button id="btnStart" class="primary">Start</button>
+            <button id="btnRestart">Restart</button>
+            <button id="btnStop">Stop</button>
+          </div>
+        </div>
+        <p id="installCard" class="note" hidden><span id="installText"></span> <button id="installRetry" class="link" hidden>Try again</button></p>
+        <p id="jobCard" class="note" hidden></p>
+        <p id="otherBanner" class="note" hidden><span id="otherText"></span> <button id="otherSwitch" class="link">Go to it</button></p>
+        <p id="restartBanner" class="note" hidden><span id="restartText">Mods changed since the server started. Restart it to load them.</span> <button id="bannerRestart" class="link">Restart now</button></p>
+        <div class="rows" aria-label="Details">
+          <div class="drow"><span class="k">Players</span><span class="v"><span id="stPlayers">–</span><small id="stNames"></small></span></div>
+          <div id="joinList"></div>
+          <div class="drow"><span class="k">Memory</span><span id="stMem" class="v">–</span></div>
+          <div class="drow"><span class="k">Computer free</span><span id="stHost" class="v">–</span></div>
+          <div class="drow"><span class="k">Whitelist</span><span id="stWl" class="v">–</span></div>
+          <div class="drow"><span class="k">Accounts</span><span id="stAcc" class="v">–</span></div>
+          <div class="drow"><span class="k">World backup</span><span class="v"><a id="dlBackup" class="link" href="/api/backup" download>Download</a></span></div>
+        </div>
+        <div class="card" id="graphCard"><h2>The last 24 hours</h2><div id="graphs"></div></div>
+        <p class="muted hint">To join: in Minecraft choose Multiplayer, Add Server, and type the address above. Stored backups, restore and schedules are on the Backups tab.</p>
+      </section>
+
+      <section id="tab-console" hidden>
+        <div class="row logbar">
+          <label class="sr" for="logSel">Which log</label>
+          <select id="logSel" class="auto"><option value="">Live console</option></select>
+          <label class="check inline"><input id="logFollow" type="checkbox" checked> Follow</label>
+          <span class="grow"></span>
+          <button id="logShare" class="small" type="button">Share log…</button>
+        </div>
+        <pre id="log" class="log" tabindex="0" aria-label="Server log"></pre>
+        <form id="cmdForm" class="row">
+          <label class="sr" for="cmd">Console command</label>
+          <input id="cmd" class="grow" placeholder="Command, for example: say hello (arrow keys bring back old ones)" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button class="primary" type="submit">Send</button>
+        </form>
+        <div class="row chips">
+          <button data-cmd="list">list</button>
+          <button data-cmd="save-all">save-all</button>
+          <button data-cmd="time set day">day</button>
+          <button data-cmd="time set night">night</button>
+          <button data-cmd="weather clear">clear weather</button>
+          <button data-cmd="weather rain">rain</button>
+        </div>
+      </section>
+
+      <section id="tab-players" hidden>
+        <div class="card">
+          <label class="switch"><input id="wlToggle" type="checkbox"><span class="track"></span><span>Whitelist</span></label>
+          <p class="muted">On: only people on the list can join. Off: anyone who knows the address can.</p>
+          <label class="switch" id="crackedRow"><input id="crackedToggle" type="checkbox"><span class="track"></span><span>Cracked</span></label>
+          <p class="muted">On: players without a bought Minecraft can join too, like on Aternos. Anyone can then join under any name, even as an operator, so keep the whitelist on. The server must be stopped to change this; the lists are converted to fit.</p>
+          <p id="plNote" class="muted"></p>
+        </div>
+        <div class="card"><h2>Online now</h2><ul id="listOnline" class="list"></ul></div>
+        <div class="card">
+          <div class="subtabs" id="plTabs" role="tablist">
+            <button type="button" data-pl="white" class="on">Whitelist</button>
+            <button type="button" data-pl="ops">Operators</button>
+            <button type="button" data-pl="banned">Banned</button>
+            <button type="button" data-pl="ips">Banned addresses</button>
+          </div>
+          <form id="plAddForm" class="row mt10">
+            <label class="sr" for="plName">Minecraft name</label>
+            <input id="plName" class="grow" placeholder="Minecraft name" pattern="\.?\w{3,16}" autocomplete="off" required>
+            <select id="plLevel" class="auto" aria-label="Operator level">
+              <option value="4">Level 4 · everything</option><option value="3">Level 3</option><option value="2">Level 2</option><option value="1">Level 1 · spawn only</option>
+            </select>
+            <input id="plReason" class="grow" placeholder="Reason (optional)" maxlength="100" autocomplete="off">
+            <button id="plAddBtn" class="primary" type="submit">Add</button>
+          </form>
+          <ul id="plList" class="list"></ul>
+        </div>
+      </section>
+
+      <section id="tab-worlds" hidden>
+        <div class="card">
+          <h2>Worlds</h2>
+          <p class="muted">Every folder with a world in it. The world in use is loaded when the server starts. Switching, deleting and making a new one need the server stopped.</p>
+          <ul id="listWorlds" class="list"></ul>
+        </div>
+        <div class="card">
+          <h2>Add a world</h2>
+          <p id="wlAddNote" class="muted">Upload a .zip with a world in it, for example the one you download from the Worlds page on Aternos. The world is found inside the zip; other files in it are left out.</p>
+          <div class="row"><input id="wlZip" type="file" accept=".zip"></div>
+          <label class="check"><input id="wlUse" type="checkbox"> Use it as soon as it is uploaded (server stopped)</label>
+          <progress id="wlProg" max="1" value="0" hidden></progress>
+        </div>
+        <div class="card">
+          <h2>New world</h2>
+          <p class="muted">Sets the next start up to make a fresh world. Your other worlds stay.</p>
+          <form id="wlNewForm" class="fields">
+            <label for="wnName">Name of the world folder</label>
+            <input id="wnName" maxlength="60" autocomplete="off" required placeholder="world2">
+            <label for="wnSeed">Seed (optional)</label>
+            <input id="wnSeed" maxlength="64" autocomplete="off">
+            <label for="wnType">Type</label>
+            <select id="wnType"><option value="normal">Normal</option><option value="flat">Superflat</option><option value="large_biomes">Large biomes</option><option value="amplified">Amplified</option></select>
+            <label class="check"><input id="wnStruct" type="checkbox" checked> Villages, temples and other structures</label>
+            <div class="row"><button class="primary" type="submit">Prepare the new world</button></div>
+          </form>
+        </div>
+        <div class="card" id="grCard">
+          <h2>Game rules</h2>
+          <p id="grNote" class="muted"></p>
+          <ul id="grList" class="list"></ul>
+        </div>
+        <div class="card" id="mapCard" hidden>
+          <h2>Live map</h2>
+          <p id="mapNote" class="muted"></p>
+          <div class="row"><button id="mapInstall" class="small primary" type="button">Install BlueMap</button><button id="mapEnable" class="small" type="button" hidden>Accept and turn on</button></div>
+          <div id="mapLinks"></div>
+        </div>
+        <div class="card" id="pgCard" hidden>
+          <h2>Pre-generate the world</h2>
+          <p id="pgNote" class="muted"></p>
+          <div class="row"><button id="pgInstall" class="small primary" type="button">Install Chunky</button></div>
+          <form id="pgForm" class="row"><label class="sr" for="pgRadius">Radius in blocks from the middle</label><input id="pgRadius" class="grow" type="number" min="100" max="5000" value="1000"><button id="pgStart" class="primary" type="submit">Start</button></form>
+          <div id="pgCtl" class="row mt8"><button id="pgPause" class="small" type="button">Pause</button><button id="pgContinue" class="small" type="button">Continue</button><button id="pgCancel" class="small danger" type="button">Stop</button></div>
+          <p id="pgLine" class="muted"></p>
+        </div>
+        <div class="card" id="dpCard">
+          <h2>Data packs</h2>
+          <p id="dpNow" class="muted"></p>
+          <ul id="dpList" class="list"></ul>
+          <div class="row mt8"><input id="dpFile" type="file" accept=".zip" multiple></div>
+          <form id="dpFindForm" class="row mt8">
+            <label class="sr" for="dpQ">Search data packs on Modrinth</label>
+            <input id="dpQ" class="grow" placeholder="Search data packs on Modrinth" autocomplete="off">
+            <button class="primary" type="submit">Search</button>
+          </form>
+          <ul id="dpResults" class="list"></ul>
+          <p class="muted">A data pack takes effect when the world loads (or after <code>/reload</code>).</p>
+        </div>
+      </section>
+
+      <section id="tab-access" hidden>
+        <div class="card">
+          <h2>You</h2>
+          <p id="acMe" class="muted"></p>
+          <button id="acLeave" class="small danger" type="button" hidden>Sign this device out</button>
+        </div>
+        <div class="card" id="acReqCard" hidden>
+          <h2>Waiting to get in</h2>
+          <ul id="acReqs" class="list"></ul>
+        </div>
+        <div class="card">
+          <h2>People with access</h2>
+          <p class="muted">Each device that was let in (with a password, an invite or a yes from you) keeps its own key. Take someone out and their device is locked out at once.</p>
+          <ul id="acPeople" class="list"></ul>
+        </div>
+        <div class="card" id="pwCard" hidden>
+          <h2>Passwords</h2>
+          <p class="muted">A password is the simplest way in: type it once on each device and it stays signed in for a year. The <b>owner password</b> gives full access. An optional <b>friends password</b> gives only what you tick, for people you trust with the same thing. Remove a device above to lock it out; change a password here and new devices need the new one.</p>
+          <form id="pwOwnerForm" class="fields">
+            <label for="pwOwner" id="pwOwnerLbl">Owner password</label>
+            <input id="pwOwner" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" minlength="8" maxlength="100" placeholder="8 or more characters">
+            <div class="row"><button class="primary" type="submit" id="pwOwnerSave">Set the owner password</button><button id="pwOwnerClear" type="button" class="danger" hidden>Remove it</button></div>
+          </form>
+          <h3 class="optGroup">Friends password</h3>
+          <form id="pwGuestForm" class="fields">
+            <label for="pwGuest">Friends password</label>
+            <input id="pwGuest" type="password" autocomplete="new-password" autocapitalize="off" spellcheck="false" minlength="8" maxlength="100" placeholder="8 or more characters, different from the owner's">
+            <label for="pwGuestPreset">What it allows</label>
+            <select id="pwGuestPreset"></select>
+            <div id="pwGuestPerms" class="permgrid"></div>
+            <div class="row"><button class="primary" type="submit" id="pwGuestSave">Set the friends password</button><button id="pwGuestClear" type="button" class="danger" hidden>Remove it</button></div>
+          </form>
+        </div>
+        <div class="card" id="doctorCard" hidden>
+          <h2>Health check</h2>
+          <p class="muted">Looks at the disk, memory, internet, the files the panel needs and each server, and says what is wrong. If something does not work, send the report to whoever helps you.</p>
+          <div class="row"><button id="docRun" class="small primary" type="button">Run the check</button><button id="docCopy" class="small" type="button" hidden>Copy the report</button></div>
+          <ul id="docList" class="list"></ul>
+        </div>
+        <div class="card" id="alertCard" hidden>
+          <h2>Alerts</h2>
+          <p class="muted">A message to your phone or to Discord when something happens. For your phone, install the free ntfy app and subscribe to a topic name only you know. For Discord, make a webhook in a channel's settings (Integrations) and paste its address; the panel never shows it again.</p>
+          <form id="alForm" class="fields">
+            <label for="alNtfy">ntfy topic (6 to 64 letters, digits, - or _)</label>
+            <input id="alNtfy" maxlength="64" autocomplete="off" placeholder="my-server-alerts-83">
+            <label for="alDiscord">Discord webhook address</label>
+            <input id="alDiscord" autocomplete="off" placeholder="https://discord.com/api/webhooks/...">
+            <div id="alEvents" class="permgrid"></div>
+            <div class="row"><button class="primary" type="submit">Save</button><button id="alTest" type="button">Send a test</button><button id="alClear" type="button" class="danger">Forget the Discord address</button></div>
+          </form>
+        </div>
+        <div class="card">
+          <h2>Activity</h2>
+          <p class="muted">What people did through the panel, newest first.</p>
+          <ul id="actList" class="list"></ul>
+        </div>
+        <div class="card">
+          <h2>Add a person by name</h2>
+          <p class="muted">Like on Aternos: type their name and tick what they may do. You get a link that fills their name in and lets that one device straight in. If they only type the name, they wait like anyone else and you say yes with one tap. Check the list afterwards to see who came in.</p>
+          <form id="acAddForm" class="fields">
+            <label for="acAddName">Their name</label>
+            <input id="acAddName" maxlength="30" autocomplete="off" required placeholder="Alex">
+            <label for="acAddPreset">What they may do</label>
+            <select id="acAddPreset"></select>
+            <div id="acAddPerms" class="permgrid"></div>
+            <label for="acAddDays">Waits for them for (days)</label>
+            <input id="acAddDays" type="number" min="1" max="30" value="7">
+            <div class="row"><button class="primary" type="submit">Add</button></div>
+          </form>
+          <div id="acAddOut" class="invite" hidden></div>
+          <ul id="acExpected" class="list"></ul>
+        </div>
+        <div class="card">
+          <h2>Invite someone</h2>
+          <p class="muted">Makes a one-time link that works for one device. They open it, type their name and they are in, with only what you tick.</p>
+          <form id="acInviteForm" class="fields">
+            <label for="acInvName">Their name</label>
+            <input id="acInvName" maxlength="30" autocomplete="off" placeholder="Alex">
+            <label for="acInvPreset">What they may do</label>
+            <select id="acInvPreset"></select>
+            <div id="acInvPerms" class="permgrid"></div>
+            <label for="acInvHours">The link works for (hours)</label>
+            <input id="acInvHours" type="number" min="1" max="336" value="24">
+            <div class="row"><button class="primary" type="submit">Make the invite</button></div>
+          </form>
+          <div id="acInviteOut" class="invite" hidden></div>
+          <ul id="acInvites" class="list"></ul>
+        </div>
+      </section>
+
+      <section id="tab-mods" hidden>
+        <div class="card">
+          <h2 id="findTitle">Find mods</h2>
+          <p class="muted" id="findDesc">Searches for mods that work with this server. Installing also adds what they need, and replaces an older copy of the same one.</p>
+          <form id="findForm" class="row">
+            <label class="sr" for="findSrc">Where to search</label>
+            <select id="findSrc" class="auto"><option value="modrinth">Modrinth</option><option value="curseforge">CurseForge</option></select>
+            <label class="sr" for="findQ">Search</label>
+            <input id="findQ" class="grow" placeholder="Search, or paste a link" autocomplete="off">
+            <button class="primary" type="submit">Search</button>
+          </form>
+          <p id="findNote" class="muted" hidden></p>
+          <ul id="findList" class="list"></ul>
+        </div>
+        <div class="card">
+          <h2 id="addTitle">Add mods</h2>
+          <p class="muted" id="addDesc">As .jar files. The server has to restart to load them.</p>
+          <div class="row"><input id="modFile" type="file" accept=".jar" multiple></div>
+          <progress id="modProg" max="1" value="0" hidden></progress>
+        </div>
+        <div class="card"><h2>Installed</h2><ul id="listMods" class="list"></ul></div>
+        <div class="card">
+          <h2>Updates</h2>
+          <p class="muted">Looks up each installed file on Modrinth and shows the ones that have a newer version for this Minecraft version. Files from other places are not checked.</p>
+          <div class="row"><button id="updCheck" class="small" type="button">Check for updates</button><button id="updAll" class="small primary" type="button" hidden>Update all</button></div>
+          <ul id="updList" class="list"></ul>
+        </div>
+      </section>
+
+      <section id="tab-files" hidden>
+        <div class="card">
+          <div id="crumbs" class="crumbs"></div>
+          <div class="row">
+            <button id="btnMkdir" class="small">New folder</button>
+            <label class="btn small" for="upFile">Upload here</label>
+            <input id="upFile" type="file" multiple hidden>
+          </div>
+          <progress id="upProg" max="1" value="0" hidden></progress>
+          <ul id="listFiles" class="list files"></ul>
+        </div>
+        <div id="editor" class="card" hidden>
+          <h2 id="editName"></h2>
+          <label class="sr" for="editText">File contents</label>
+          <textarea id="editText" spellcheck="false" autocapitalize="off"></textarea>
+          <div class="row mt10">
+            <button id="editSave" class="primary">Save</button>
+            <button id="editClose">Close</button>
+            <span class="muted">Changes to server files usually need a restart.</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-backups" hidden>
+        <div class="card">
+          <p class="muted">Saved on this computer in this server's <code>backups</code> folder. The newest ones are kept; the number is on the Settings tab.</p>
+          <div class="row">
+            <button id="btnBackup" class="primary">Back up now</button>
+            <button id="btnReset">Start a fresh world…</button>
+          </div>
+          <ul id="listBackups" class="list mt8"></ul>
+        </div>
+        <div class="card" id="offCard" hidden>
+          <h2>A copy somewhere else</h2>
+          <p class="muted">Backups on this computer are lost with its disk. Every new backup can also be copied to a folder (a USB drive or a network share) and/or to the cloud through <b>rclone</b> (set it up once with <code>rclone config</code> on this computer). Only the owner sees this.</p>
+          <form id="offForm" class="fields">
+            <label for="offFolder">Folder (the whole path, empty = off)</label>
+            <input id="offFolder" maxlength="300" placeholder="/media/usb/minecraft-backups" autocomplete="off">
+            <label for="offCloud">Cloud with rclone (like gdrive:minecraft, empty = off)</label>
+            <input id="offCloud" maxlength="250" placeholder="gdrive:minecraft-backups" autocomplete="off">
+            <label for="offKeep">Copies to keep per server</label>
+            <input id="offKeep" type="number" min="1" max="100">
+            <div class="row"><button class="primary" type="submit">Save</button><button id="offSend" type="button">Copy the newest backups now</button></div>
+          </form>
+          <p id="offLast" class="muted"></p>
+        </div>
+      </section>
+
+      <section id="tab-look" hidden>
+        <div class="card">
+          <div id="preview" class="mcentry" aria-label="Preview of the server in Minecraft's server list">
+            <img id="pvIcon" class="mcicon" alt="" width="64" height="64">
+            <div class="mctext">
+              <div class="mctop"><span id="pvName" class="mcname"></span><span class="mcping">0/10</span></div>
+              <div id="pvMotd1" class="mcmotd"></div>
+              <div id="pvMotd2" class="mcmotd"></div>
+            </div>
+          </div>
+          <p class="muted">Minecraft's list shows the name each player types on their own device. The server itself only sends the picture and the two lines.</p>
+          <form id="lookForm" class="fields">
+            <label for="lkName">Name</label>
+            <input id="lkName" class="px" maxlength="40" required>
+            <label for="lkPort">Address (port)</label>
+            <input id="lkPort" type="number" min="1024" max="65535" required>
+            <label for="lkMotd1">Text, first line</label>
+            <input id="lkMotd1" class="px" maxlength="90" autocomplete="off">
+            <label for="lkMotd2">Text, second line</label>
+            <input id="lkMotd2" class="px" maxlength="90" autocomplete="off">
+            <div class="swatches" id="swatches" aria-label="Colour and style codes"></div>
+            <p class="muted">Tap a colour to add its code (like &amp;a) where the cursor is. &amp;l bold, &amp;o italic, &amp;n underline, &amp;m strikethrough, &amp;r reset.</p>
+            <label for="lkIcon">Picture</label>
+            <div class="row">
+              <input id="lkIcon" type="file" accept="image/*">
+              <button id="lkIconClear" type="button" class="small">Remove picture</button>
+            </div>
+            <div class="row"><button class="primary" type="submit">Save</button><span class="muted">A changed port, text or picture shows after a restart.</span></div>
+          </form>
+        </div>
+        <div class="card" id="packCard">
+          <h2>Required resource pack</h2>
+          <p id="packNow" class="muted"></p>
+          <p class="muted">Players are asked to download it when they join, and are kicked if they refuse. Minecraft allows one pack per server.</p>
+          <form id="packFindForm" class="row">
+            <label class="sr" for="packQ">Search resource packs on Modrinth</label>
+            <input id="packQ" class="grow" placeholder="Search resource packs on Modrinth" autocomplete="off">
+            <button class="primary" type="submit">Search</button>
+          </form>
+          <ul id="packList" class="list"></ul>
+          <form id="packUrlForm" class="fields">
+            <label for="packUrl">Or a direct link to a .zip (https)</label>
+            <input id="packUrl" type="url" placeholder="https://example.com/pack.zip" autocomplete="off">
+            <label for="packPrompt">Message shown with the pack (optional)</label>
+            <input id="packPrompt" maxlength="120" placeholder="This server needs its texture pack" autocomplete="off">
+            <label class="check"><input id="packReq" type="checkbox" checked> Players must accept it</label>
+            <div class="row"><button class="primary" type="submit">Use this link</button><button id="packClear" type="button">Remove the pack</button></div>
+          </form>
+        </div>
+      </section>
+
+      <section id="tab-settings" hidden>
+        <div class="card">
+          <h2>Game options</h2>
+          <form id="optForm" class="fields"></form>
+        </div>
+        <div class="card" id="swCard">
+          <h2>Software and version</h2>
+          <p id="swNow" class="muted"></p>
+          <div id="swForm" class="row">
+            <label class="sr" for="swSel">Software</label>
+            <select id="swSel" class="auto"></select>
+            <label class="sr" for="swVer">Minecraft version</label>
+            <select id="swVer" class="auto"></select>
+            <button id="swGo">Change</button>
+          </div>
+          <p class="muted mt8">Your world and files stay. Make a backup first: a newer Minecraft cannot go back to an older one, and mods or plugins for the old version may stop working.</p>
+        </div>
+        <div class="card" id="lagCard">
+          <h2>Is it laggy?</h2>
+          <p class="muted">Measures how fast the server really runs right now (with spark, or the game's own tick command) and says what to try.</p>
+          <div class="row"><button id="lagCheck" class="small primary" type="button">Check now</button><button id="lagInstall" class="small" type="button" hidden>Install spark</button><button id="lagProfile" class="small" type="button" hidden>Record 60 seconds</button></div>
+          <p id="lagVerdict"></p>
+          <ul id="lagHints" class="list"></ul>
+          <p id="lagLink" class="muted"></p>
+          <pre id="lagText" class="log" hidden></pre>
+        </div>
+        <div class="card">
+          <h2>Automatic</h2>
+          <form id="autoForm" class="fields">
+            <label for="auBackupEvery">Back up every (hours, 0 = off)</label>
+            <input id="auBackupEvery" type="number" min="0" max="168">
+            <label for="auBackupKeep">Backups to keep</label>
+            <input id="auBackupKeep" type="number" min="1" max="30">
+            <label for="auIdle">Stop the server when nobody has been on for (minutes, 0 = never)</label>
+            <input id="auIdle" type="number" min="0" max="1440">
+            <label for="auRestart">Restart every day at (like 04:30, empty = never)</label>
+            <input id="auRestart" type="text" maxlength="5" placeholder="04:30" autocomplete="off">
+            <label for="auStart">Start the server every day at (empty = never)</label>
+            <input id="auStart" type="text" maxlength="5" placeholder="16:00" autocomplete="off">
+            <label for="auStop">Stop the server every day at (empty = never)</label>
+            <input id="auStop" type="text" maxlength="5" placeholder="22:30" autocomplete="off">
+            <label for="auMem" id="auMemLbl">Memory for this server (MB, empty = automatic)</label>
+            <input id="auMem" type="number" min="512" step="256" autocomplete="off">
+            <p id="auMemNote" class="muted"></p>
+            <label class="check"><input id="auCrash" type="checkbox"> Start it again if it crashes (up to 3 times in half an hour)</label>
+            <div class="row"><button class="primary" type="submit">Save</button></div>
+          </form>
+        </div>
+        <div class="card" id="pubCard">
+          <h2>Friends outside your network</h2>
+          <p class="muted">Friends on your Wi-Fi or Tailscale can already join. For everyone else this server needs a tunnel that gives it a public address. A free one is playit.gg: install its agent on this computer, sign in on playit.gg, make a "Minecraft Java" tunnel that points to port <b id="pubPort"></b>, then paste the address it shows you here. It is shown with the other join addresses.</p>
+          <form id="pubForm" class="row"><label class="sr" for="pubAddr">Public address</label><input id="pubAddr" class="grow" placeholder="something.joinmc.link or 1.2.3.4:12345" autocomplete="off"><button class="primary" type="submit">Save</button><button id="pubTest" type="button">Test it</button></form>
+          <p id="pubMsg" class="muted"></p>
+        </div>
+        <div class="card" id="bedCard" hidden>
+          <h2>Bedrock players</h2>
+          <p id="bedNote" class="muted"></p>
+          <div class="row"><button id="bedInstall" class="small primary" type="button">Install Geyser and Floodgate</button><button id="bedEnable" class="small" type="button" hidden>Let them in without a Java account</button></div>
+        </div>
+        <div class="card" id="dupCard">
+          <h2>Copy this server</h2>
+          <p class="muted">Makes a second server with the same world, mods and settings (not the backups), on its own port. The server must be stopped.</p>
+          <button id="btnDup" type="button">Copy this server…</button>
+        </div>
+        <div class="card" id="delCard">
+          <h2>Delete this server</h2>
+          <p class="muted">Removes its folder with the world, mods and backups. This cannot be undone.</p>
+          <button id="btnDelete" class="danger">Delete this server…</button>
+        </div>
+      </section>
+
+      <section id="tab-import" hidden>
+        <div class="card">
+          <h2>Move a server here</h2>
+          <p>Bring over a server you made somewhere else, for example on Aternos. The panel reads what is in your download, makes a new server with the same software and Minecraft version (so mods and plugins keep working) and puts the world, mods or plugins and their data, settings, player lists, name and picture into it.</p>
+          <ol class="steps">
+            <li>On aternos.org open your server. On the <strong>Worlds</strong> page download the world; on the <strong>Files</strong> page select everything and download too, if you want the mods, plugins and config. You get .zip files.</li>
+            <li>Choose the .zip below (or a Modrinth modpack, a .mrpack file: its mods are downloaded and checked). The more of the server is in it, the more is carried over. You can add the next zip afterwards with "Put it into a server I already have".</li>
+            <li>Nothing changes until you press the button, and a world you already have is kept as a backup folder.</li>
+          </ol>
+          <p class="muted">Aternos has no way to export automatically, and this panel never logs in to your Aternos account: you download the files yourself. Bedrock Edition worlds cannot be used.</p>
+          <div class="row"><input id="impFile" type="file" accept=".zip,.mrpack,.tar.gz,.tgz"></div>
+          <progress id="impProg" max="1" value="0" hidden></progress>
+          <p id="impStatus" class="muted" hidden></p>
+        </div>
+        <div id="impPlan" class="card" hidden></div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog">
+    <p id="dlgText"></p>
+    <input id="dlgInput" aria-label="Name" autocomplete="off" hidden>
+    <div class="row end">
+      <button value="yes" id="dlgOk" class="primary">OK</button>
+      <button value="no" formnovalidate>Cancel</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="moreSheet" class="sheet" aria-label="More">
+  <h2 class="px">More</h2>
+  <ul class="sheetlist">
+    <li><button class="item" data-tab="worlds"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>Worlds</button></li>
+    <li><button class="item" data-tab="mods"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M12 3 3 7.5v9L12 21l9-4.5v-9zM3 7.5l9 4.5 9-4.5M12 12v9"/></svg><span class="lbl">Mods</span></button></li>
+    <li><button class="item" data-tab="backups"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M3 7h18v4H3zM5 11v9h14v-9M10 15h4"/></svg>Backups</button></li>
+    <li><button class="item" data-tab="look"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M3 5h18v14H3zM3 16l5-5 4 4 3-3 6 6"/><circle cx="16" cy="9" r="1.4"/></svg>Look</button></li>
+    <li><button class="item" data-tab="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Settings</button></li>
+    <li><button class="item" data-tab="import"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>Move a server here</button></li>
+    <li><button class="item" data-tab="access"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>Access</button></li>
+  </ul>
+</dialog>
+
+<dialog id="srvSheet" class="sheet" aria-label="Servers">
+  <h2 class="px">Servers</h2>
+  <ul id="srvList" class="sheetlist"></ul>
+  <button id="srvNew" class="primary wide-btn">Create new server</button>
+</dialog>
+
+<dialog id="createDlg" class="sheet wide">
+  <form id="createForm" method="dialog" class="fields">
+    <div class="row dlghead">
+      <h2 class="px dlgtitle">New server</h2>
+      <button value="cancel" formnovalidate class="ghost" aria-label="Close"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    </div>
+    <label for="cName">Name</label>
+    <input id="cName" class="px" maxlength="40" required autocomplete="off">
+    <fieldset class="opts"><legend>Software</legend><div id="cSoftList" role="radiogroup" aria-label="Software"></div></fieldset>
+    <label for="cVer">Minecraft version</label>
+    <select id="cVer"></select>
+    <label for="cPort">Address (port, leave empty to pick one)</label>
+    <input id="cPort" type="number" min="1024" max="65535" placeholder="automatic">
+    <label for="cMotd1">Text in the server list, first line</label>
+    <input id="cMotd1" class="px" maxlength="90" autocomplete="off">
+    <label for="cMotd2">Second line</label>
+    <input id="cMotd2" class="px" maxlength="90" autocomplete="off">
+    <label for="cSeed">World seed (optional)</label>
+    <input id="cSeed" maxlength="64" autocomplete="off">
+    <label for="cIcon">Picture (optional)</label>
+    <input id="cIcon" type="file" accept="image/*">
+    <label class="check"><input id="cLists" type="checkbox" checked> Copy the whitelist and operators from the main server</label>
+    <label class="check"><input id="cEula" type="checkbox"> I accept the <a href="https://aka.ms/MinecraftEULA" target="_blank" rel="noopener noreferrer">Minecraft EULA</a></label>
+    <p class="muted">How many servers can run at once depends on the memory of this computer. New servers start with the whitelist on.</p>
+    <div class="row end">
+      <button class="primary" id="cGo" value="go">Create server</button>
+      <button value="cancel" formnovalidate>Cancel</button>
+    </div>
+  </form>
+</dialog>
+<dialog id="permDlg" class="sheet">
+  <form id="permForm" method="dialog" class="fields">
+    <h2 id="permTitle" class="px"></h2>
+    <label for="permPreset">What they may do</label>
+    <select id="permPreset"></select>
+    <div id="permGrid" class="permgrid"></div>
+    <label class="check"><input id="permAll" type="checkbox" checked> All servers</label>
+    <div id="permServers" class="permgrid" hidden></div>
+    <div class="row end"><button class="primary" id="permOk" value="ok">Save</button><button value="cancel" formnovalidate>Cancel</button></div>
+  </form>
+</dialog>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script src="/app.js"></script>
+</body>
+</html>
